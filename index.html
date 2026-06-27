@@ -7,379 +7,81 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        body { background-color: #121214; color: #ffffff; font-family: 'Inter', sans-serif; margin: 0; padding-bottom: 90px; }
         
-        body {
-            background-color: #121214;
-            color: #ffffff;
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            padding: 0;
-            padding-bottom: 90px; 
-        }
-
-        /* Шапка */
-        .header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 20px;
-        }
-        .greeting-block {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-        .greeting-text p { margin: 0; }
-        .greeting-sub { font-size: 14px; color: #888; }
-        .greeting-name { font-size: 22px; font-weight: 800; color: #b14bf4; }
-
-        /* Карточка подписки */
-        .sub-card {
-            background: linear-gradient(135deg, #a100ff, #5000aa);
-            border-radius: 20px;
-            padding: 20px;
-            margin: 0 15px 20px;
-            box-shadow: 0 5px 20px rgba(161, 0, 255, 0.3);
-        }
-        .sub-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 5px;
-        }
-        .sub-title { font-size: 12px; color: rgba(255,255,255,0.7); }
-        .badge {
-            background: rgba(255,255,255,0.2);
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 10px;
-            font-weight: 800;
-        }
-        .plan-name { font-size: 24px; font-weight: 800; margin-bottom: 15px; }
-        .active-until { font-size: 14px; margin-bottom: 8px; font-weight: 600; }
+        /* Стили блоков */
+        .page { display: none; }
+        .page.active { display: block; }
         
-        /* Полоска прогресса подписки */
-        .progress-bg {
-            background: rgba(0,0,0,0.3);
-            border-radius: 10px;
-            height: 8px;
-            width: 100%;
-            margin-bottom: 8px;
-            overflow: hidden;
-        }
-        .progress-fill {
-            background: #fff;
-            height: 100%;
-            border-radius: 10px;
-            width: 0%; 
-            transition: width 0.5s ease;
-        }
-        .days-left { font-size: 12px; color: rgba(255,255,255,0.8); margin-bottom: 15px; }
-
-        .btn-renew {
-            background: rgba(255,255,255,0.15);
-            color: #fff;
-            border: 1px solid rgba(255,255,255,0.3);
-            width: 100%;
-            padding: 12px;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        /* Быстрые действия */
-        .section-title { padding: 0 15px; font-size: 18px; font-weight: 800; margin-top: 25px; margin-bottom: 15px; }
-        .grid-actions {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            padding: 0 15px;
-        }
-        .action-box {
-            border-radius: 18px;
-            padding: 20px 15px;
-            color: white;
-            text-decoration: none;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            min-height: 70px;
-        }
-        .box-purple { background: linear-gradient(135deg, #8e2de2, #4a00e0); }
-        .box-pink { background: linear-gradient(135deg, #ff0844, #ffb199); }
-        .box-orange { background: linear-gradient(135deg, #f12711, #f5af19); }
-        .box-grey { background: #222225; border: 1px solid #333; }
+        /* Твой дизайн (оставляем старые стили для красоты) */
+        .header { display: flex; align-items: center; justify-content: space-between; padding: 20px; }
+        .avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
+        .sub-card { background: linear-gradient(135deg, #a100ff, #5000aa); border-radius: 20px; padding: 20px; margin: 0 15px 20px; }
+        .btn-renew { background: rgba(255,255,255,0.15); width: 100%; padding: 12px; border-radius: 12px; color: #fff; border: none; font-weight: 600; }
         
-        .box-title { font-size: 15px; font-weight: 800; margin-bottom: 4px; }
-        .box-subtitle { font-size: 11px; opacity: 0.8; }
-
-        /* СПИСОК СЕРВЕРОВ */
-        .server-list {
-            padding: 0 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .server-card {
-            background-color: #1e1e22;
-            border-radius: 16px;
-            padding: 15px;
-            border: 1px solid #2a2a30;
-        }
-        .server-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        .server-name-block {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .server-code {
-            font-size: 20px;
-            font-weight: 800;
-            color: #fff;
-        }
-        .server-name {
-            font-size: 16px;
-            font-weight: 600;
-        }
-        .btn-connect {
-            background: #b14bf4;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 13px;
-            cursor: pointer;
-        }
-        .server-stats {
-            display: flex;
-            gap: 15px;
-            font-size: 12px;
-            color: #aaa;
-            margin-bottom: 12px;
-        }
-        .stat-item {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .stat-icon { color: #f5af19; }
-        
-        .quality-text {
-            display: flex;
-            justify-content: space-between;
-            font-size: 11px;
-            color: #888;
-            margin-bottom: 6px;
-        }
-        .quality-bar-bg {
-            background: #2a2a30;
-            border-radius: 5px;
-            height: 4px;
-            width: 100%;
-        }
-        .quality-bar-fill {
-            height: 100%;
-            border-radius: 5px;
-        }
-        .fill-yellow { background: #f5af19; width: 61%; }
-        .fill-green { background: #4cd964; width: 82%; }
+        /* Нижнее меню */
+        .tab-bar { position: fixed; bottom: 0; width: 100%; background-color: #1c1c1e; display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid #333; }
+        .tab-item { color: #888; text-align: center; font-size: 12px; cursor: pointer; }
+        .tab-item.active { color: #b14bf4; }
     </style>
 </head>
 <body>
 
-    <!-- Шапка -->
-    <div class="header">
-        <div class="greeting-block">
-            <img id="user-photo" class="avatar" src="https://via.placeholder.com/50" alt="Avatar">
-            <div class="greeting-text">
-                <p class="greeting-sub">Привет,</p>
-                <p class="greeting-name" id="user-name">Загрузка...</p>
+    <div id="home" class="page active">
+        <div class="header">
+            <div style="display:flex; align-items:center; gap:15px;">
+                <img id="user-photo" class="avatar" src="https://via.placeholder.com/50">
+                <div><p style="font-size:14px;color:#888;">Привет,</p><p id="user-name" style="font-size:20px;font-weight:800;"></p></div>
             </div>
+        </div>
+        <div class="sub-card">
+            <div id="sub-plan" style="font-size:22px; font-weight:800;">Загрузка...</div>
+            <div id="sub-days" style="margin-top:10px;">Осталось 0 дней</div>
+            <button class="btn-renew" style="margin-top:15px;" onclick="tg.close()">Продлить подписку</button>
         </div>
     </div>
 
-    <!-- Карточка подписки -->
-    <div class="sub-card">
-        <div class="sub-header">
-            <div class="sub-title">Ваша подписка</div>
-            <div class="badge" id="sub-status">ЗАГРУЗКА</div>
+    <div id="profile" class="page">
+        <h2 style="padding:20px;">Мой профиль</h2>
+        <div style="padding:20px; background:#1e1e22; margin:0 15px; border-radius:15px;">
+            <p>Telegram ID: <span id="uid"></span></p>
+            <p>Статус: <span id="status"></span></p>
         </div>
-        <div class="plan-name" id="sub-plan">Drivik VPN</div>
-        
-        <div class="active-until" id="sub-date">Активна до ...</div>
-        
-        <div class="progress-bg">
-            <div class="progress-fill" id="sub-progress"></div>
-        </div>
-        
-        <div class="days-left" id="sub-days">Осталось ... дней</div>
-
-        <button class="btn-renew" onclick="tg.close()">Продлить подписку</button>
     </div>
 
-    <h3 class="section-title">⚡ Быстрые действия</h3>
-    
-    <div class="grid-actions">
-        <a href="#" class="action-box box-purple">
-            <div class="box-title">📖 Инструкция</div>
-            <div class="box-subtitle">Как подключиться</div>
-        </a>
-        <a href="https://t.me/oomab" class="action-box box-pink">
-            <div class="box-title">💬 Поддержка</div>
-            <div class="box-subtitle">Помощь 24/7</div>
-        </a>
-        <a href="#" class="action-box box-orange">
-            <div class="box-title">👤 Мой профиль</div>
-            <div class="box-subtitle">Настройки аккаунта</div>
-        </a>
-        <a href="#" class="action-box box-grey">
-            <div class="box-title" style="color: #666;">🎁 Рефералы</div>
-            <div class="box-subtitle" style="color: #666;">В разработке</div>
-        </a>
+    <div id="devices" class="page">
+        <h2 style="padding:20px;">Устройства</h2>
+        <button class="btn-renew" style="background:#ff3b30; margin: 0 15px; width:90%;" onclick="resetKey()">🔄 Сбросить ключ</button>
     </div>
 
-    <!-- НОВЫЙ БЛОК: СПИСОК СЕРВЕРОВ -->
-    <h3 class="section-title">🌍 Локации</h3>
-    <div class="server-list">
-        
-        <!-- Албания -->
-        <div class="server-card">
-            <div class="server-top">
-                <div class="server-name-block">
-                    <span class="server-code">AL</span>
-                    <span class="server-name">Албания</span>
-                </div>
-                <button class="btn-connect">Подключить</button>
-            </div>
-            <div class="server-stats">
-                <div class="stat-item"><span class="stat-icon">📶</span> ~118 мс</div>
-                <div class="stat-item">☁️ 167GB за сегодня</div>
-            </div>
-            <div class="quality-text">
-                <span>Качество соединения</span>
-                <span>61%</span>
-            </div>
-            <div class="quality-bar-bg">
-                <div class="quality-bar-fill fill-yellow"></div>
-            </div>
-        </div>
-
-        <!-- Финляндия -->
-        <div class="server-card">
-            <div class="server-top">
-                <div class="server-name-block">
-                    <span class="server-code">FI</span>
-                    <span class="server-name">Финляндия</span>
-                </div>
-                <button class="btn-connect">Подключить</button>
-            </div>
-            <div class="server-stats">
-                <div class="stat-item"><span class="stat-icon">📶</span> ~120 мс</div>
-                <div class="stat-item">☁️ 148GB за сегодня</div>
-            </div>
-            <div class="quality-text">
-                <span>Качество соединения</span>
-                <span>60%</span>
-            </div>
-            <div class="quality-bar-bg">
-                <div class="quality-bar-fill fill-yellow" style="width: 60%;"></div>
-            </div>
-        </div>
-
-        <!-- Германия -->
-        <div class="server-card">
-            <div class="server-top">
-                <div class="server-name-block">
-                    <span class="server-code">DE</span>
-                    <span class="server-name">Германия</span>
-                </div>
-                <button class="btn-connect">Подключить</button>
-            </div>
-            <div class="server-stats">
-                <div class="stat-item"><span class="stat-icon">📶</span> ~53 мс</div>
-                <div class="stat-item">☁️ 79.6GB за сегодня</div>
-            </div>
-            <div class="quality-text">
-                <span>Качество соединения</span>
-                <span>82%</span>
-            </div>
-            <div class="quality-bar-bg">
-                <div class="quality-bar-fill fill-green"></div>
-            </div>
-        </div>
-
-        <!-- Нидерланды -->
-        <div class="server-card">
-            <div class="server-top">
-                <div class="server-name-block">
-                    <span class="server-code">NL</span>
-                    <span class="server-name">Нидерланды</span>
-                </div>
-                <button class="btn-connect">Подключить</button>
-            </div>
-            <div class="server-stats">
-                <div class="stat-item"><span class="stat-icon">📶</span> ~68 мс</div>
-                <div class="stat-item">☁️ 74.2GB за сегодня</div>
-            </div>
-            <div class="quality-text">
-                <span>Качество соединения</span>
-                <span>77%</span>
-            </div>
-            <div class="quality-bar-bg">
-                <div class="quality-bar-fill fill-green" style="width: 77%;"></div>
-            </div>
-        </div>
-
+    <div class="tab-bar">
+        <div class="tab-item active" onclick="showPage('home', this)">🏠 Главная</div>
+        <div class="tab-item" onclick="showPage('profile', this)">👤 Профиль</div>
+        <div class="tab-item" onclick="showPage('devices', this)">📱 Устройства</div>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
-        tg.ready();
-
-        let user = tg.initDataUnsafe.user;
-        if (user) {
-            document.getElementById('user-name').innerText = user.first_name + '!';
-            if (user.photo_url) {
-                document.getElementById('user-photo').src = user.photo_url;
-            }
+        
+        function showPage(pageId, element) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            element.classList.add('active');
         }
 
+        // Заполняем данными
         const urlParams = new URLSearchParams(window.location.search);
-        const days = urlParams.get('days') || '0';
-        const date = urlParams.get('date') || 'Неизвестно';
-        const status = urlParams.get('status') || 'Нет';
-        const plan = urlParams.get('plan') || 'Без подписки';
+        document.getElementById('user-name').innerText = tg.initDataUnsafe.user.first_name + '!';
+        document.getElementById('uid').innerText = tg.initDataUnsafe.user.id;
+        document.getElementById('sub-plan').innerText = urlParams.get('plan');
+        document.getElementById('sub-days').innerText = 'Осталось ' + urlParams.get('days') + ' дней';
+        document.getElementById('status').innerText = urlParams.get('status');
 
-        document.getElementById('sub-plan').innerText = plan;
-        
-        if (status === 'Активна') {
-            document.getElementById('sub-status').innerText = 'ACTIVE';
-            document.getElementById('sub-date').innerText = `Активна до ${date}`;
-            document.getElementById('sub-days').innerText = `Осталось ${days} дней`;
-            
-            let percent = (parseInt(days) / 30) * 100;
-            if (percent > 100) percent = 100;
-            document.getElementById('sub-progress').style.width = percent + '%';
-        } else {
-            document.getElementById('sub-status').innerText = 'INACTIVE';
-            document.getElementById('sub-status').style.background = '#ff3b30';
-            document.getElementById('sub-date').innerText = 'Подписка закончилась';
-            document.getElementById('sub-days').innerText = '0 дней';
-            document.getElementById('sub-progress').style.width = '0%';
+        function resetKey() {
+            // Отправляем сигнал боту
+            tg.sendData(JSON.stringify({action: "reset_key"}));
         }
     </script>
 </body>
