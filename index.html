@@ -7,81 +7,395 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
-        body { background-color: #121214; color: #ffffff; font-family: 'Inter', sans-serif; margin: 0; padding-bottom: 90px; }
         
-        /* Стили блоков */
-        .page { display: none; }
+        * { box-sizing: border-box; }
+        body { 
+            background-color: #121214; color: #ffffff; 
+            font-family: 'Inter', sans-serif; margin: 0; padding: 0; 
+            padding-bottom: 90px; -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Навигация SPA */
+        .page { display: none; animation: fadeIn 0.3s ease; }
         .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- ГЛАВНАЯ СТРАНИЦА --- */
+        .header { padding: 20px; display: flex; align-items: center; justify-content: space-between; }
+        .user-info { display: flex; align-items: center; gap: 15px; }
+        .avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.1); }
+        .greeting { font-size: 13px; color: #888; margin: 0 0 2px 0; }
+        .name { font-size: 18px; font-weight: 800; margin: 0; color: #fff; }
+        .theme-toggle { background: rgba(255,255,255,0.1); width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+        /* Карточка подписки (Главная) */
+        .main-card { background: linear-gradient(135deg, #a100ff, #5000aa); border-radius: 20px; padding: 20px; margin: 0 15px 15px; box-shadow: 0 10px 20px rgba(161, 0, 255, 0.2); }
+        .main-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .main-card-title { font-size: 12px; color: rgba(255,255,255,0.8); }
+        .badge { background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 12px; font-size: 10px; font-weight: 800; letter-spacing: 0.5px; }
+        .plan-title { font-size: 24px; font-weight: 800; margin-bottom: 10px; }
+        .plan-date { font-size: 13px; margin-bottom: 10px; font-weight: 600; }
+        .progress-bg { background: rgba(0,0,0,0.3); height: 6px; border-radius: 10px; margin-bottom: 8px; overflow: hidden; }
+        .progress-fill { background: #fff; height: 100%; width: 0%; border-radius: 10px; }
+        .days-left { font-size: 11px; color: rgba(255,255,255,0.7); margin-bottom: 15px; }
+        .btn-renew { background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); width: 100%; padding: 12px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; }
+
+        /* Онлайн и Быстрые действия */
+        .online-counter { background: #1c1c1e; margin: 0 15px 20px; padding: 12px; border-radius: 15px; text-align: center; font-size: 13px; color: #aaa; font-weight: 600; border: 1px solid #2a2a30; }
+        .online-dot { color: #4cd964; margin-right: 5px; }
         
-        /* Твой дизайн (оставляем старые стили для красоты) */
-        .header { display: flex; align-items: center; justify-content: space-between; padding: 20px; }
-        .avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
-        .sub-card { background: linear-gradient(135deg, #a100ff, #5000aa); border-radius: 20px; padding: 20px; margin: 0 15px 20px; }
-        .btn-renew { background: rgba(255,255,255,0.15); width: 100%; padding: 12px; border-radius: 12px; color: #fff; border: none; font-weight: 600; }
+        .section-title { padding: 0 15px; font-size: 16px; font-weight: 800; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .grid-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 15px 25px; }
+        .action-box { border-radius: 18px; padding: 15px; color: white; display: flex; flex-direction: column; justify-content: center; min-height: 80px; text-decoration: none; cursor: pointer; }
+        .action-box h4 { margin: 0 0 4px 0; font-size: 14px; font-weight: 800; }
+        .action-box p { margin: 0; font-size: 11px; opacity: 0.8; }
         
-        /* Нижнее меню */
-        .tab-bar { position: fixed; bottom: 0; width: 100%; background-color: #1c1c1e; display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid #333; }
-        .tab-item { color: #888; text-align: center; font-size: 12px; cursor: pointer; }
+        .bg-purple { background: linear-gradient(135deg, #8e2de2, #4a00e0); }
+        .bg-pink { background: linear-gradient(135deg, #ff0844, #ffb199); }
+        .bg-orange { background: linear-gradient(135deg, #f12711, #f5af19); }
+        .bg-yellow { background: linear-gradient(135deg, #f7971e, #ffd200); }
+
+        /* Сервера */
+        .server-list { padding: 0 15px; display: flex; flex-direction: column; gap: 12px; }
+        .server-card { background: #1e1e22; border-radius: 16px; padding: 16px; border: 1px solid #2a2a30; }
+        .s-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .s-name { font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+        .s-code { font-size: 18px; color: #fff; }
+        .btn-connect { background: rgba(177, 75, 244, 0.2); color: #b14bf4; border: none; padding: 6px 14px; border-radius: 10px; font-size: 12px; font-weight: 600; }
+        .s-stats { display: flex; gap: 15px; font-size: 11px; color: #888; margin-bottom: 12px; }
+        .s-stats span { display: flex; align-items: center; gap: 4px; }
+        .q-text { display: flex; justify-content: space-between; font-size: 11px; color: #888; margin-bottom: 6px; }
+        .q-bg { background: #2a2a30; height: 4px; border-radius: 4px; width: 100%; }
+        .q-fill { height: 100%; border-radius: 4px; }
+
+        /* --- СТРАНИЦА: ПРОФИЛЬ --- */
+        .profile-hero { background: linear-gradient(180deg, #8e2de2 0%, #121214 100%); padding: 40px 20px 20px; text-align: center; }
+        .profile-hero .avatar { width: 90px; height: 90px; margin-bottom: 15px; border: 3px solid rgba(255,255,255,0.2); }
+        .profile-hero h2 { margin: 0 0 5px 0; font-size: 24px; font-weight: 800; }
+        .profile-hero p { margin: 0; color: rgba(255,255,255,0.7); font-size: 14px; }
+        
+        .list-group { background: #1e1e22; margin: 0 15px 20px; border-radius: 16px; border: 1px solid #2a2a30; overflow: hidden; }
+        .list-item { padding: 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2a2a30; font-size: 14px; }
+        .list-item:last-child { border-bottom: none; }
+        .list-item-title { display: flex; align-items: center; gap: 10px; color: #ddd; }
+        .list-item-val { color: #888; }
+        .btn-copy { background: #2a2a30; border: none; color: #fff; padding: 5px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; }
+
+        /* --- СТРАНИЦА: ДЕТАЛИ ПОДПИСКИ --- */
+        .sub-hero { background: linear-gradient(135deg, #a100ff, #5000aa); padding: 40px 20px 30px; text-align: center; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; margin-bottom: 20px; }
+        .sub-hero h1 { font-size: 48px; font-weight: 800; margin: 0; line-height: 1; }
+        .sub-hero p { font-size: 14px; opacity: 0.8; margin: 5px 0 20px 0; }
+        
+        .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 0 15px 20px; }
+        .stat-box { background: rgba(255,255,255,0.1); border-radius: 12px; padding: 12px 5px; text-align: center; }
+        .stat-box-title { font-size: 11px; opacity: 0.7; margin-bottom: 5px; }
+        .stat-box-val { font-size: 14px; font-weight: 800; }
+
+        .key-box { background: #1e1e22; margin: 0 15px 20px; padding: 15px; border-radius: 16px; border: 1px solid #2a2a30; display: flex; align-items: center; gap: 10px; }
+        .key-input { flex: 1; background: transparent; border: none; color: #888; font-size: 13px; outline: none; text-overflow: ellipsis; }
+        .btn-copy-main { background: rgba(177, 75, 244, 0.2); color: #b14bf4; border: none; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+        /* --- СТРАНИЦА: УСТРОЙСТВА --- */
+        .devices-wrap { padding: 20px 15px; }
+        .usage-bar { background: #1e1e22; padding: 20px; border-radius: 16px; border: 1px solid #2a2a30; margin-bottom: 20px; text-align: center; }
+        .usage-text { font-size: 14px; margin-bottom: 10px; color: #fff; }
+        .btn-danger { background: #ff3b30; color: #fff; border: none; width: 100%; padding: 15px; border-radius: 12px; font-size: 15px; font-weight: 800; margin-top: 10px; cursor: pointer; }
+
+        /* --- СТРАНИЦА: РЕКВИЗИТЫ (Вместо рефералов) --- */
+        .bank-card { background: linear-gradient(135deg, #222, #111); border: 1px solid #333; border-radius: 16px; padding: 20px; margin-bottom: 15px; position: relative; overflow: hidden; }
+        .bank-card::before { content: ''; position: absolute; top: -50px; right: -50px; width: 100px; height: 100px; background: rgba(255,255,255,0.05); border-radius: 50%; }
+        .bank-name { font-size: 16px; font-weight: 800; margin-bottom: 20px; color: #fff; }
+        .bank-number { font-size: 20px; font-weight: 600; letter-spacing: 2px; margin-bottom: 15px; color: #b14bf4; }
+        
+        /* Таб-бар */
+        .tab-bar { position: fixed; bottom: 0; width: 100%; background: rgba(28, 28, 30, 0.95); backdrop-filter: blur(10px); display: flex; justify-content: space-around; padding: 12px 0 25px; border-top: 1px solid #333; z-index: 1000; }
+        .tab-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: #888; font-size: 11px; font-weight: 600; cursor: pointer; width: 25%; }
         .tab-item.active { color: #b14bf4; }
+        .tab-icon { font-size: 22px; }
     </style>
 </head>
 <body>
 
     <div id="home" class="page active">
         <div class="header">
-            <div style="display:flex; align-items:center; gap:15px;">
-                <img id="user-photo" class="avatar" src="https://via.placeholder.com/50">
-                <div><p style="font-size:14px;color:#888;">Привет,</p><p id="user-name" style="font-size:20px;font-weight:800;"></p></div>
+            <div class="user-info">
+                <img id="h-avatar" class="avatar" src="https://via.placeholder.com/50">
+                <div>
+                    <p class="greeting">Привет,</p>
+                    <p id="h-name" class="name">Загрузка...</p>
+                </div>
+            </div>
+            <div class="theme-toggle">🌙</div>
+        </div>
+
+        <div class="main-card">
+            <div class="main-card-top">
+                <span class="main-card-title">Ваша подписка</span>
+                <span class="badge" id="h-status-badge">STABLE</span>
+            </div>
+            <div class="plan-title" id="h-plan">Премиум план</div>
+            <div class="plan-date" id="h-date">Активна до ...</div>
+            <div class="progress-bg"><div class="progress-fill" id="h-progress"></div></div>
+            <div class="days-left" id="h-days">Осталось ... дней</div>
+            <button class="btn-renew" onclick="tg.close()">Продлить подписку</button>
+        </div>
+
+        <div class="online-counter">
+            <span class="online-dot">●</span> 105 пользователей онлайн сейчас
+        </div>
+
+        <div class="section-title">⚡ Быстрые действия</div>
+        <div class="grid-actions">
+            <a href="https://t.me/oomab" class="action-box bg-purple">
+                <h4>📖 Инструкция</h4><p>Как подключиться</p>
+            </a>
+            <a href="https://t.me/oomab" class="action-box bg-pink">
+                <h4>💬 Поддержка</h4><p>Помощь 24/7</p>
+            </a>
+            <div class="action-box bg-orange" onclick="showPage('profile', document.getElementById('tab-profile'))">
+                <h4>👤 Мой профиль</h4><p>Настройки аккаунта</p>
+            </div>
+            <div class="action-box bg-yellow" onclick="showPage('payment', null)">
+                <h4>💳 Реквизиты</h4><p>Для оплаты</p>
             </div>
         </div>
-        <div class="sub-card">
-            <div id="sub-plan" style="font-size:22px; font-weight:800;">Загрузка...</div>
-            <div id="sub-days" style="margin-top:10px;">Осталось 0 дней</div>
-            <button class="btn-renew" style="margin-top:15px;" onclick="tg.close()">Продлить подписку</button>
+
+        <div class="section-title">🌍 Лучшие страны</div>
+        <div class="server-list">
+            <div class="server-card">
+                <div class="s-top">
+                    <div class="s-name"><span class="s-code">AL</span> Албания</div>
+                    <button class="btn-connect">Подключить</button>
+                </div>
+                <div class="s-stats">
+                    <span>📶 ~118 мс</span> <span>☁️ 167GB за сегодня</span>
+                </div>
+                <div class="q-text"><span>Качество соединения</span><span>61%</span></div>
+                <div class="q-bg"><div class="q-fill" style="background:#f5af19; width:61%;"></div></div>
+            </div>
+            <div class="server-card">
+                <div class="s-top">
+                    <div class="s-name"><span class="s-code">DE</span> Германия</div>
+                    <button class="btn-connect">Подключить</button>
+                </div>
+                <div class="s-stats">
+                    <span>📶 ~53 мс</span> <span>☁️ 79.6GB за сегодня</span>
+                </div>
+                <div class="q-text"><span>Качество соединения</span><span>82%</span></div>
+                <div class="q-bg"><div class="q-fill" style="background:#4cd964; width:82%;"></div></div>
+            </div>
+            <div class="server-card">
+                <div class="s-top">
+                    <div class="s-name"><span class="s-code">NL</span> Нидерланды</div>
+                    <button class="btn-connect">Подключить</button>
+                </div>
+                <div class="s-stats">
+                    <span>📶 ~68 мс</span> <span>☁️ 74.2GB за сегодня</span>
+                </div>
+                <div class="q-text"><span>Качество соединения</span><span>77%</span></div>
+                <div class="q-bg"><div class="q-fill" style="background:#4cd964; width:77%;"></div></div>
+            </div>
         </div>
     </div>
 
-    <div id="profile" class="page">
-        <h2 style="padding:20px;">Мой профиль</h2>
-        <div style="padding:20px; background:#1e1e22; margin:0 15px; border-radius:15px;">
-            <p>Telegram ID: <span id="uid"></span></p>
-            <p>Статус: <span id="status"></span></p>
+
+    <div id="sub" class="page">
+        <div class="sub-hero">
+            <h1 id="s-days-big">0</h1>
+            <p id="s-date-big">дней осталось до ...</p>
+            <div class="stats-row">
+                <div class="stat-box">
+                    <div class="stat-box-title">Время</div>
+                    <div class="stat-box-val" id="s-time-pct">0%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-title">Трафик</div>
+                    <div class="stat-box-val">∞</div>
+                </div>
+                <div class="stat-box" onclick="showPage('devices', document.getElementById('tab-devices'))">
+                    <div class="stat-box-title">Устройства</div>
+                    <div class="stat-box-val">1/6 ➔</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section-title">🔑 Ключ подключения</div>
+        <div class="key-box">
+            <input type="text" class="key-input" id="vpn-key" value="vless://... (Получите в боте)" readonly>
+            <button class="btn-copy-main" onclick="copyKey()">📋</button>
+        </div>
+
+        <div class="section-title">Детали подписки</div>
+        <div class="list-group">
+            <div class="list-item">
+                <span class="list-item-title">Период</span>
+                <span class="list-item-val">1 мес.</span>
+            </div>
+            <div class="list-item">
+                <span class="list-item-title">Трафик</span>
+                <span class="list-item-val">Безлимит</span>
+            </div>
+            <div class="list-item" onclick="showPage('devices', document.getElementById('tab-devices'))">
+                <span class="list-item-title">Устройства</span>
+                <span class="list-item-val">1 / 6 ➔</span>
+            </div>
         </div>
     </div>
+
 
     <div id="devices" class="page">
-        <h2 style="padding:20px;">Устройства</h2>
-        <button class="btn-renew" style="background:#ff3b30; margin: 0 15px; width:90%;" onclick="resetKey()">🔄 Сбросить ключ</button>
+        <div class="devices-wrap">
+            <h2 style="margin-top:0;">📱 Устройства</h2>
+            <div class="usage-bar">
+                <div class="usage-text">Использовано слотов: <b style="color:#b14bf4;">1 / 6</b></div>
+                <div class="progress-bg"><div class="progress-fill" style="background:#b14bf4; width:16%;"></div></div>
+                <p style="font-size:12px; color:#888; margin-top:15px;">Технология не позволяет удалять устройства поштучно. Если доступ попал к чужим, сбросьте ключ.</p>
+            </div>
+            <button class="btn-danger" onclick="resetKey()">🔄 Сбросить ключ</button>
+        </div>
     </div>
 
+
+    <div id="profile" class="page">
+        <div class="profile-hero">
+            <img id="p-avatar" class="avatar" src="https://via.placeholder.com/90">
+            <h2 id="p-name">Имя</h2>
+            <p id="p-username">@username</p>
+            <p style="font-size:12px; opacity:0.5; margin-top:5px;" id="p-id">ID: 000</p>
+        </div>
+        
+        <div class="section-title" style="margin-top:10px;">Аккаунт</div>
+        <div class="list-group">
+            <div class="list-item">
+                <span class="list-item-title">📱 Telegram ID</span>
+                <span class="list-item-val" id="p-id-copy">000</span>
+            </div>
+            <div class="list-item">
+                <span class="list-item-title">🌙 Тема</span>
+                <span class="list-item-val">Тёмная</span>
+            </div>
+        </div>
+
+        <div class="section-title">Помощь</div>
+        <div class="list-group">
+            <a href="https://t.me/oomab" class="list-item" style="text-decoration:none;">
+                <span class="list-item-title">💬 Поддержка (24/7)</span>
+                <span class="list-item-val">➔</span>
+            </a>
+        </div>
+    </div>
+
+
+    <div id="payment" class="page">
+        <div class="devices-wrap">
+            <h2 style="margin-top:0;">💳 Оплата подписки</h2>
+            <p style="color:#888; font-size:14px; margin-bottom:20px;">Переведите нужную сумму на один из счетов ниже, а затем отправьте чек боту.</p>
+            
+            <div class="bank-card">
+                <div class="bank-name">🟢 Сбербанк</div>
+                <div class="bank-number">0000 0000 0000 0000</div>
+                <button class="btn-copy" onclick="copyText('0000000000000000')">Копировать</button>
+            </div>
+
+            <div class="bank-card" style="background: linear-gradient(135deg, #333, #000);">
+                <div class="bank-name">🟡 Т-Банк (Тинькофф)</div>
+                <div class="bank-number">+7 999 000-00-00</div>
+                <button class="btn-copy" onclick="copyText('+79990000000')">Копировать</button>
+            </div>
+        </div>
+    </div>
+
+
     <div class="tab-bar">
-        <div class="tab-item active" onclick="showPage('home', this)">🏠 Главная</div>
-        <div class="tab-item" onclick="showPage('profile', this)">👤 Профиль</div>
-        <div class="tab-item" onclick="showPage('devices', this)">📱 Устройства</div>
+        <div class="tab-item active" id="tab-home" onclick="showPage('home', this)">
+            <span class="tab-icon">🏠</span>Главная
+        </div>
+        <div class="tab-item" onclick="tg.close()">
+            <span class="tab-icon">🛒</span>Купить
+        </div>
+        <div class="tab-item" id="tab-sub" onclick="showPage('sub', this)">
+            <span class="tab-icon">🔑</span>Подписка
+        </div>
+        <div class="tab-item" id="tab-profile" onclick="showPage('profile', this)">
+            <span class="tab-icon">👤</span>Профиль
+        </div>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
-        
-        function showPage(pageId, element) {
+        tg.ready();
+
+        // Логика переключения страниц (SPA)
+        function showPage(pageId, tabElement) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
-            element.classList.add('active');
+            
+            if (tabElement) {
+                document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+                tabElement.classList.add('active');
+            }
         }
 
-        // Заполняем данными
-        const urlParams = new URLSearchParams(window.location.search);
-        document.getElementById('user-name').innerText = tg.initDataUnsafe.user.first_name + '!';
-        document.getElementById('uid').innerText = tg.initDataUnsafe.user.id;
-        document.getElementById('sub-plan').innerText = urlParams.get('plan');
-        document.getElementById('sub-days').innerText = 'Осталось ' + urlParams.get('days') + ' дней';
-        document.getElementById('status').innerText = urlParams.get('status');
+        // Данные юзера из Telegram
+        let user = tg.initDataUnsafe.user;
+        if (user) {
+            let fullName = user.first_name + (user.last_name ? ' ' + user.last_name : '');
+            
+            // Заполняем Главную
+            document.getElementById('h-name').innerText = fullName;
+            if(user.photo_url) document.getElementById('h-avatar').src = user.photo_url;
+            
+            // Заполняем Профиль
+            document.getElementById('p-name').innerText = fullName;
+            document.getElementById('p-username').innerText = user.username ? '@' + user.username : '';
+            document.getElementById('p-id').innerText = 'ID: ' + user.id;
+            document.getElementById('p-id-copy').innerText = user.id;
+            if(user.photo_url) document.getElementById('p-avatar').src = user.photo_url;
+        }
 
+        // Данные подписки из URL
+        const params = new URLSearchParams(window.location.search);
+        let status = params.get('status') || 'Нет';
+        let days = parseInt(params.get('days') || '0');
+        let plan = params.get('plan') || 'Без подписки';
+        
+        // Заполняем интерфейс
+        document.getElementById('h-plan').innerText = plan;
+        
+        if (status === 'Активна') {
+            document.getElementById('h-status-badge').innerText = 'ACTIVE';
+            document.getElementById('h-date').innerText = 'Активна';
+            document.getElementById('h-days').innerText = `Осталось ${days} дней`;
+            
+            document.getElementById('s-days-big').innerText = days;
+            document.getElementById('s-date-big').innerText = 'дней осталось';
+            
+            let pct = Math.min((days / 30) * 100, 100);
+            document.getElementById('h-progress').style.width = pct + '%';
+            document.getElementById('s-time-pct').innerText = Math.round(pct) + '%';
+        } else {
+            document.getElementById('h-status-badge').innerText = 'INACTIVE';
+            document.getElementById('h-status-badge').style.background = '#ff3b30';
+            document.getElementById('h-days').innerText = '0 дней';
+            document.getElementById('s-days-big').innerText = '0';
+        }
+
+        // Функции кнопок
+        function copyKey() {
+            let key = document.getElementById('vpn-key').value;
+            navigator.clipboard.writeText(key).then(() => tg.showAlert("Ключ скопирован!"));
+        }
+        function copyText(text) {
+            navigator.clipboard.writeText(text).then(() => tg.showAlert("Скопировано: " + text));
+        }
         function resetKey() {
-            // Отправляем сигнал боту
-            tg.sendData(JSON.stringify({action: "reset_key"}));
+            tg.showConfirm("Вы уверены, что хотите сбросить ключ? Старый перестанет работать.", function(confirm) {
+                if(confirm) {
+                    tg.sendData(JSON.stringify({action: "reset_key"}));
+                    tg.close();
+                }
+            });
         }
     </script>
 </body>
