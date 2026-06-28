@@ -321,7 +321,7 @@
         </div>
     </div>
 
-    <script>
+<script>
         let tg = window.Telegram.WebApp;
         tg.expand();
         tg.ready();
@@ -360,6 +360,10 @@
         let days = parseInt(params.get('days') || '0');
         let plan = params.get('plan') || 'Без подписки';
         
+        // 💥 ПОДСТАВЛЯЕМ РЕАЛЬНУЮ ССЫЛКУ:
+        let realLink = params.get('link') || 'Ключ не найден (оплатите подписку)';
+        document.getElementById('vpn-key').value = realLink;
+        
         // Заполняем интерфейс
         document.getElementById('h-plan').innerText = plan;
         
@@ -384,7 +388,7 @@
         // Функции кнопок
         function copyKey() {
             let key = document.getElementById('vpn-key').value;
-            navigator.clipboard.writeText(key).then(() => tg.showAlert("Ключ скопирован!"));
+            navigator.clipboard.writeText(key).then(() => tg.showAlert("Ключ скопирован в буфер обмена!"));
         }
         function copyText(text) {
             navigator.clipboard.writeText(text).then(() => tg.showAlert("Скопировано: " + text));
